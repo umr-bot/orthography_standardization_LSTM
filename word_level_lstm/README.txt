@@ -1,20 +1,16 @@
 To train use:
 
-    python train.py --foldset_num <foldset_num> --model_num <model_num> --hidden_size <hidden_dim_size> --dropout <dropout_percentage> --model <model_name> --num_epochs <number_epochs> --data_dir <path_to_train_file> --checkpoints <path_to_save_model_checkpoints>
-
+    python train_word.py --foldset_num <foldset_num> --model_num <model_num> --model <model_name> --num_epochs <number_epochs> --data_dir <path_to_train_file> --checkpoints <path_to_save_model_checkpoints>
+    
     foldset_num: Specific foldset to use train data from
 
     model_num: Epoch (of previously trained model) to start training from
 
-    hidden_size: Size of hidden dimension layers of lstm
-
-    dropout: Dropout percentage to use on all lstm layers
-    
-    model: Model name, eg lstm_1 where '1' represents that number of layers in network
+    model: Model name, can be one of {softmax_regression, lstm_word_n, bi_lstm_word_n, lstm_word_n_embed}
 
     num_epochs: Number of epochs to train upto
 
-    data_dir: Sath to a directory containining foldset folders with names foldset{1,2,3,4,5} as seen in skeleton folder 'char_level_lstm/data'. Each foldset folder should contain a train, val and test file.
+    data_dir: Path to a directory containining foldset folders with names foldset{1,2,3,4,5} as seen in skeleton folder 'char_level_lstm/data'. Each foldset folder should contain a train, val and test file, where each line should contain a comma seperated trigram eg. "what, a, day"
 
     checkpoints: Directory in which to save checkpoint models.
 

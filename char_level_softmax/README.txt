@@ -1,16 +1,13 @@
 To train use:
 
-    python train.py --foldset_num <foldset_num> --model_num <model_num> --hidden_size <hidden_dim_size> --dropout <dropout_percentage> --model <model_name> --num_epochs <number_epochs> --data_dir <path_to_train_file> --checkpoints <path_to_save_model_checkpoints>
-
+    python train.py --foldset_num <foldset_num> --model_num <model_num> --model <model_name> --num_epochs <number_epochs> --data_dir <path_to_train_file> --checkpoints <path_to_save_model_checkpoints>
+    python train.py --foldset_num 1 --model_num 0 --model "softmax_regression" --num_epochs 10 --data_dir data/unigrams --checkpoints checkpoints/data/softmax_regression
+    
     foldset_num: Specific foldset to use train data from
 
     model_num: Epoch (of previously trained model) to start training from
-
-    hidden_size: Size of hidden dimension layers of lstm
-
-    dropout: Dropout percentage to use on all lstm layers
     
-    model: Model name, eg lstm_1 where '1' represents that number of layers in network
+    model: Model name, in this case will be softmax_regression 
 
     num_epochs: Number of epochs to train upto
 
