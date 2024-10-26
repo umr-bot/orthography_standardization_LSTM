@@ -2,68 +2,8 @@
 #from keras.preprocessing.sequence import pad_sequences
 #from tensorflow.keras.utils import Sequence
 import numpy as np
-
-#def prepare_sentence(seq, maxlen):
-#    # Pads seq and slides windows
-#    x = []
-#    y = []
-#    for i, w in enumerate(seq):
-#        x_padded = pad_sequences([seq[i:]],
-#                                 maxlen=maxlen - 1,
-#                                 padding='post')[0]  # Pads before each sequence
-#        x.append(x_padded)
-#        y.append(w)
-#    return x, y
-#
-#class DataGenerator(Sequence):
-#    # Memory efficient data generator for feeding sentences
-#    def __init__(self, sentences, batch_size=32, shuffle=True):
-#        # Initilise
-#        self.sentences = sentences
-#        self.indexes = np.arange(len(sentences))
-#        self.batch_size = batch_size
-#        self.shuffle = shuffle
-#
-#        # Preprocess data
-#        tokenizer = Tokenizer()
-#        tokenizer.fit_on_texts(sentences)
-#        self.tokenizer = tokenizer
-#        self.vocab = tokenizer.word_index
-#        self.seqs = tokenizer.texts_to_sequences(sentences)
-#        self.maxlen = max([len(seq) for seq in self.seqs])
-#
-#        self.on_epoch_end()
-#
-#    def __len__(self):
-#        # Denotes the number of batches per epoch
-#        return int(np.floor(len(self.sentences) / self.batch_size))
-#
-#    def __getitem__(self, index):
-#        # Load one batch of data
-#        # Generate indexes of the batch
-#        indexes = self.indexes[index * self.batch_size: (index + 1) * self.batch_size]
-#
-#        # Get seqhences for the batch
-#        seqs = [self.seqs[k] for k in indexes]
-#
-#        # Slide windows and pad selected sequences
-#        x = []
-#        y = []
-#        for seq in seqs:
-#            x_windows, y_windows = prepare_sentence(seq, self.maxlen)
-#            x += x_windows
-#            y += y_windows
-#        x = np.array(x)
-#        #x = np.eye(len(self.vocab))[x]
-#        y = np.array(y) - 1
-#        y = np.eye(len(self.vocab))[y]  # One hot encoding
-#
-#        return x, y
-#
-#    def on_epoch_end(self):
-#        # Updates indexes after each epoch
-#        if self.shuffle:
-#            np.random.shuffle(self.indexes)
+SOS = '\t' # start of sequence.
+EOS = '*' # end of sequence.
 
 class WordTable(object):
     """Given a set of words:
@@ -117,4 +57,52 @@ class WordTable(object):
             indices = x
         words = ' '.join(self.index2word[ind] for ind in indices)
         return indices, words
+
+def transform2(tokens, maxlen, shuffle=False, dec_tokens=[], chrs=[], reverse=False):
+    """Transform tokens into model inputs and targets.
+    All inputs and targets are padded to maxlen with EOS character.
+    """
+    encoder_tokens = []
+    decoder_tokens = []
+    target_tokens = []
+    copy_tokens,copy_dec_tokens=[],[]
+    if chrs != []:
+        for i in range(len(tokens)):
+            tok,dec_tok = tokens[i], dec_tokens[i]
+            if set(tok).issubset(chrs) and set(dec_tok).issubset(chrs):
+                copy_tokens.append(tok)
+                copy_dec_tokens.append(dec_tok)
+        tokens, dec_tokens = copy_tokens,copy_dec_tokens
+
+    assert(len(tokens)==len(dec_tokens))
+    for i in range(len(tokens)):
+        token,dec_token = tokens[i], dec_tokens[i]
+        if len(token) > 0: # only deal with tokens longer than length 3
+            #encoder = add_speling_erors(token, error_rate=error_rate)
+            encoder = token
+            encoder += EOS * (maxlen - len(encoder)) # Padded to maxlen.
+            if reverse: encoder = encoder[::-1]
+            #encoder_tokens.append(encoder)
+        
+            decoder = SOS + dec_token
+            decoder += EOS * (maxlen - len(decoder))
+            #decoder_tokens.append(decoder)
+        
+            target = decoder[1:]
+            target += EOS * (maxlen - len(target))
+            #target_tokens.append(target)
+            if (len(encoder) == len(decoder) == len(target)):
+                encoder_tokens.append(encoder)
+                decoder_tokens.append(decoder)
+                target_tokens.append(target)
+            else: continue
+
+    return encoder_tokens, decoder_tokens, target_tokens
+
+def datagen_simple(input_iter, target_iter):
+    """Utility function to load data into required model format."""
+    while(True):
+        input_ = next(input_iter)
+        target = next(target_iter)
+        yield (input_, target)
 
